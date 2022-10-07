@@ -239,108 +239,12 @@ while i <= len(mon):
 ![image](https://user-images.githubusercontent.com/113620568/194553535-6fb0c60d-568e-4d66-b229-91ad7d0eb9f4.png)
 ![image](https://user-images.githubusercontent.com/113620568/194553591-ad2d98f7-22c0-4c9d-92bd-267d0491490d.png)
 
-## Задание 3
-### Самостоятельно разработать сценарий воспроизведения звукового сопровождения в Unity в зависимости от изменения считанных данных в задании 2
 
--Используя полученные навыки в задании 1, приеняем их к 3 задаче.
-Unity
-```py
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Networking;
-using SimpleJSON;
-
-public class NewBehaviourScript : MonoBehaviour
-{
-    public AudioClip goodSpeak;
-    public AudioClip normalSpeak;
-    public AudioClip badSpeak;
-    private AudioSource selectAudio;
-    private Dictionary<string,float> dataSet = new Dictionary<string,float>();
-    private bool statusStart = false;
-    private int i = 1;
-
-    // Start is called before the first frame update
-    void Start()
-{
-    StartCoroutine(GoogleSheets());
-}
-
-// Update is called once per frame
-void Update()
-{
-    if (dataSet["Mon_" + i.ToString()] <= 250 & statusStart == false & i != dataSet.Count)
-    {
-        StartCoroutine(PlaySelectAudioGood());
-        Debug.Log(dataSet["Mon_" + i.ToString()]);
-    }
-
-    if (dataSet["Mon_" + i.ToString()] > 250 & dataSet["Mon_" + i.ToString()] < 1000 & statusStart == false & i != dataSet.Count)
-    {
-        StartCoroutine(PlaySelectAudioNormal());
-        Debug.Log(dataSet["Mon_" + i.ToString()]);
-    }
-
-    if (dataSet["Mon_" + i.ToString()] >= 1000 & statusStart == false & i != dataSet.Count)
-    {
-        StartCoroutine(PlaySelectAudioBad());
-        Debug.Log(dataSet["Mon_" + i.ToString()]);
-    }
-}
-
-IEnumerator GoogleSheets()
-{
-    UnityWebRequest curentResp = UnityWebRequest.Get("https://sheets.googleapis.com/v4/spreadsheets/141_5UEHK-42DVjMl4KFq2ReO0P4l-9KliQ6FFlpBXE8/values/Лист1?key=AIzaSyDxZjmNS5u-Tr725hqxK9NgY5_OJ1OLzMw");
-    yield return curentResp.SendWebRequest();
-    string rawResp = curentResp.downloadHandler.text;
-    var rawJson = JSON.Parse(rawResp);
-    foreach (var itemRawJson in rawJson["values"])
-    {
-        var parseJson = JSON.Parse(itemRawJson.ToString());
-        var selectRow = parseJson[0].AsStringList;
-        dataSet.Add(("Mon_" + selectRow[0]), float.Parse(selectRow[1]));
-    }
-}
-
-IEnumerator PlaySelectAudioGood()
-{
-    statusStart = true;
-    selectAudio = GetComponent<AudioSource>();
-    selectAudio.clip = goodSpeak;
-    selectAudio.Play();
-    yield return new WaitForSeconds(3);
-    statusStart = false;
-    i++;
-}
-IEnumerator PlaySelectAudioNormal()
-{
-    statusStart = true;
-    selectAudio = GetComponent<AudioSource>();
-    selectAudio.clip = normalSpeak;
-    selectAudio.Play();
-    yield return new WaitForSeconds(3);
-    statusStart = false;
-    i++;
-}
-IEnumerator PlaySelectAudioBad()
-{
-    statusStart = true;
-    selectAudio = GetComponent<AudioSource>();
-    selectAudio.clip = badSpeak;
-    selectAudio.Play();
-    yield return new WaitForSeconds(4);
-    statusStart = false;
-    i++;
-}
-}
-
-
-```
 
 ## Выводы
 
-Абзац умных слов о том, что было сделано и что было узнано.
+В ходе выполнения данной лабораторной работы я научился загружать данные из кода сразу в гугл таблицу, а также считывать эти данные в игру на юнити. 
+
 
 | Plugin | README |
 | ------ | ------ |
