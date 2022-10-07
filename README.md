@@ -183,7 +183,7 @@ public class NewBehaviourScript : MonoBehaviour
 ### Реализовать запись в Google-таблицу набора данных, полученных с помощью линейной регрессии из лабораторной работы № 1
 - Для выполнения данного задания необходимо научить программу записывать данные в Гугл таблицу. Благодаря 1 заданию, я это умею делать.
 
-
+PY
 ```py
 
 import gspread
@@ -243,26 +243,98 @@ while i <= len(mon):
 ### Самостоятельно разработать сценарий воспроизведения звукового сопровождения в Unity в зависимости от изменения считанных данных в задании 2
 
 -Используя полученные навыки в задании 1, приеняем их к 3 задаче.
-
+Unity
 ```py
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Networking;
+using SimpleJSON;
 
-import ScriptEnv
-ScriptEnv.Initialize("Ansoft.ElectronicsDesktop")
-oDesktop.RestoreWindow()
-oProject = oDesktop.NewProject()
-oProject.Rename("C:/Users/denisov.dv/Documents/Ansoft/SphereDIffraction.aedt", True)
-oProject.InsertDesign("HFSS", "HFSSDesign1", "HFSS Terminal Network", "")
-oDesign = oProject.SetActiveDesign("HFSSDesign1")
-oEditor = oDesign.SetActiveEditor("3D Modeler")
-oEditor.CreateSphere(
-	[
-		"NAME:SphereParameters",
-		"XCenter:="		, "0mm",
-		"YCenter:="		, "0mm",
-		"ZCenter:="		, "0mm",
-		"Radius:="		, "1.0770329614269mm"
-	], 
-)
+public class NewBehaviourScript : MonoBehaviour
+{
+    public AudioClip goodSpeak;
+    public AudioClip normalSpeak;
+    public AudioClip badSpeak;
+    private AudioSource selectAudio;
+    private Dictionary<string,float> dataSet = new Dictionary<string,float>();
+    private bool statusStart = false;
+    private int i = 1;
+
+    // Start is called before the first frame update
+    void Start()
+{
+    StartCoroutine(GoogleSheets());
+}
+
+// Update is called once per frame
+void Update()
+{
+    if (dataSet["Mon_" + i.ToString()] <= 250 & statusStart == false & i != dataSet.Count)
+    {
+        StartCoroutine(PlaySelectAudioGood());
+        Debug.Log(dataSet["Mon_" + i.ToString()]);
+    }
+
+    if (dataSet["Mon_" + i.ToString()] > 250 & dataSet["Mon_" + i.ToString()] < 1000 & statusStart == false & i != dataSet.Count)
+    {
+        StartCoroutine(PlaySelectAudioNormal());
+        Debug.Log(dataSet["Mon_" + i.ToString()]);
+    }
+
+    if (dataSet["Mon_" + i.ToString()] >= 1000 & statusStart == false & i != dataSet.Count)
+    {
+        StartCoroutine(PlaySelectAudioBad());
+        Debug.Log(dataSet["Mon_" + i.ToString()]);
+    }
+}
+
+IEnumerator GoogleSheets()
+{
+    UnityWebRequest curentResp = UnityWebRequest.Get("https://sheets.googleapis.com/v4/spreadsheets/141_5UEHK-42DVjMl4KFq2ReO0P4l-9KliQ6FFlpBXE8/values/Лист1?key=AIzaSyDxZjmNS5u-Tr725hqxK9NgY5_OJ1OLzMw");
+    yield return curentResp.SendWebRequest();
+    string rawResp = curentResp.downloadHandler.text;
+    var rawJson = JSON.Parse(rawResp);
+    foreach (var itemRawJson in rawJson["values"])
+    {
+        var parseJson = JSON.Parse(itemRawJson.ToString());
+        var selectRow = parseJson[0].AsStringList;
+        dataSet.Add(("Mon_" + selectRow[0]), float.Parse(selectRow[1]));
+    }
+}
+
+IEnumerator PlaySelectAudioGood()
+{
+    statusStart = true;
+    selectAudio = GetComponent<AudioSource>();
+    selectAudio.clip = goodSpeak;
+    selectAudio.Play();
+    yield return new WaitForSeconds(3);
+    statusStart = false;
+    i++;
+}
+IEnumerator PlaySelectAudioNormal()
+{
+    statusStart = true;
+    selectAudio = GetComponent<AudioSource>();
+    selectAudio.clip = normalSpeak;
+    selectAudio.Play();
+    yield return new WaitForSeconds(3);
+    statusStart = false;
+    i++;
+}
+IEnumerator PlaySelectAudioBad()
+{
+    statusStart = true;
+    selectAudio = GetComponent<AudioSource>();
+    selectAudio.clip = badSpeak;
+    selectAudio.Play();
+    yield return new WaitForSeconds(4);
+    statusStart = false;
+    i++;
+}
+}
+
 
 ```
 
